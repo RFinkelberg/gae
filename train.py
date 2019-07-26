@@ -5,19 +5,20 @@ import time
 import os
 
 # Train on CPU (hide GPU) due to memory constraints
-os.environ['CUDA_VISIBLE_DEVICES'] = ""
+# os.environ['CUDA_VISIBLE_DEVICES'] = ""
 
 import tensorflow as tf
 import numpy as np
 import scipy.sparse as sp
+import networkx as nx
 
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import average_precision_score
 
-from gae.optimizer import OptimizerAE, OptimizerVAE
-from gae.input_data import load_data
-from gae.model import GCNModelAE, GCNModelVAE
-from gae.preprocessing import preprocess_graph, construct_feed_dict, sparse_to_tuple, mask_test_edges
+from gae.gae.optimizer import OptimizerAE, OptimizerVAE
+from gae.gae.input_data import load_data, CyberDataset
+from gae.gae.model import GCNModelAE, GCNModelVAE
+from gae.gae.preprocessing import preprocess_graph, construct_feed_dict, sparse_to_tuple, mask_test_edges
 
 # Settings
 flags = tf.app.flags
@@ -31,13 +32,42 @@ flags.DEFINE_float('dropout', 0., 'Dropout rate (1 - keep probability).')
 
 flags.DEFINE_string('model', 'gcn_ae', 'Model string.')
 flags.DEFINE_string('dataset', 'cora', 'Dataset string.')
+flags.DEFINE_string('data_dir', '/mnt/vgae/data', 'Directory contianing cyber datasets')
 flags.DEFINE_integer('features', 1, 'Whether to use features (1) or not (0).')
 
 model_str = FLAGS.model
 dataset_str = FLAGS.dataset
 
 # Load data
-adj, features = load_data(dataset_str)
+# adj, features = load_data(dataset_str) # type CSR sparse, LIL sparse
+data_loader = CyberDataset(FLAGS.data_dir)
+adj, features = data_loader.load_data(dataset_str)
+
+# email_data = np.genfromtxt('/mnt/vgae/data/email-Eu-core-temporal.txt', delimiter=' ')
+# G = nx.from_edgelist(email_data[:, :2])
+# adj = nx.adjacency_matrix(G)
+# features = sp.identity(adj.shape[0])
+
+# Try setting the timestamp as a feature, TODO maybe we'll have to modify the biases
+# FIXME problem, timestamps are properties of edges not nodes. moreover node features are static over time which is a problem for dynamic graphs
+# features = sp.spdiags(email_data[:, 2], 0, )
+# features = np.zeros(adj.shape[0])
+# import pdb; pdb.set_trace()
+# for (u, v) in email_data[::-1, :2]:
+#     features[adj.nodes]
+
+# email_data[:, 2] = (email_data[:, 2] - email_data[:, 2].min()) / (email_data[:, 2].max() - email_data[:, 2].min())
+# for i, node in enumerate(G.nodes()):
+#     latest_in = email_data[email_data[:, 0] == node][:, 2]
+#     latest_out = email_data[email_data[:, 1] == node][:, 2]
+
+#     if latest_in.size == 0:
+#         latest_in = np.array([-1])
+#     if latest_out.size == 0:
+#         latest_out = np.array([-1])
+
+#     features[i] = max(latest_in.max(), latest_out.max())
+# features = sp.spdiags(features, 0, features.shape[0], features.shape[0])
 
 # Store original adjacency matrix (without diagonal entries) for later
 adj_orig = adj
@@ -97,8 +127,8 @@ with tf.name_scope('optimizer'):
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-cost_val = []
-acc_val = []
+# cost_val = []
+# acc_val = []
 
 
 def get_roc_score(edges_pos, edges_neg, emb=None):
@@ -131,14 +161,15 @@ def get_roc_score(edges_pos, edges_neg, emb=None):
     return roc_score, ap_score
 
 
-cost_val = []
-acc_val = []
+# cost_val = []
+# acc_val = []
 val_roc_score = []
 
 adj_label = adj_train + sp.eye(adj_train.shape[0])
 adj_label = sparse_to_tuple(adj_label)
 
 # Train model
+tstart = time.time()
 for epoch in range(FLAGS.epochs):
 
     t = time.time()
@@ -165,3 +196,4 @@ print("Optimization Finished!")
 roc_score, ap_score = get_roc_score(test_edges, test_edges_false)
 print('Test ROC score: ' + str(roc_score))
 print('Test AP score: ' + str(ap_score))
+print(f'Training time taken: {time.time() - tstart}')

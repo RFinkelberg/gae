@@ -1,8 +1,10 @@
-from gae.layers import GraphConvolution, GraphConvolutionSparse, InnerProductDecoder
+# from gae.layers import GraphConvolution, GraphConvolutionSparse, InnerProductDecoder
+from gae.gae.layers import GraphConvolution, GraphConvolutionSparse, InnerProductDecoder
 import tensorflow as tf
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
+
 
 
 class Model(object):
@@ -41,7 +43,7 @@ class Model(object):
 
 
 class GCNModelAE(Model):
-    def __init__(self, placeholders, num_features, features_nonzero, **kwargs):
+    def __init__(self, placeholders, num_features, features_nonzero, hidden1_dim=32, hidden2_dim=16, **kwargs):
         super(GCNModelAE, self).__init__(**kwargs)
 
         self.inputs = placeholders['features']
@@ -49,19 +51,24 @@ class GCNModelAE(Model):
         self.features_nonzero = features_nonzero
         self.adj = placeholders['adj']
         self.dropout = placeholders['dropout']
+        self.hidden1_dim = hidden1_dim
+        self.hidden2_dim = hidden2_dim
         self.build()
 
     def _build(self):
         self.hidden1 = GraphConvolutionSparse(input_dim=self.input_dim,
-                                              output_dim=FLAGS.hidden1,
+                                            #   output_dim=FLAGS.hidden1,
+                                              output_dim=self.hidden1_dim,
                                               adj=self.adj,
                                               features_nonzero=self.features_nonzero,
                                               act=tf.nn.relu,
                                               dropout=self.dropout,
                                               logging=self.logging)(self.inputs)
 
-        self.embeddings = GraphConvolution(input_dim=FLAGS.hidden1,
-                                           output_dim=FLAGS.hidden2,
+        self.embeddings = GraphConvolution(input_dim=self.hidden1_dim,
+            # input_dim=FLAGS.hidden1,
+            #                                output_dim=FLAGS.hidden2,
+                                           output_dim=self.hidden2_dim,
                                            adj=self.adj,
                                            act=lambda x: x,
                                            dropout=self.dropout,
@@ -69,7 +76,8 @@ class GCNModelAE(Model):
 
         self.z_mean = self.embeddings
 
-        self.reconstructions = InnerProductDecoder(input_dim=FLAGS.hidden2,
+        self.reconstructions = InnerProductDecoder(input_dim=self.hidden2_dim,
+                                    #   input_dim=FLAGS.hidden2,
                                       act=lambda x: x,
                                       logging=self.logging)(self.embeddings)
 

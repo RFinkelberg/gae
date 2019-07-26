@@ -96,7 +96,8 @@ def mask_test_edges(adj):
         val_edges_false.append([idx_i, idx_j])
 
     assert ~ismember(test_edges_false, edges_all)
-    assert ~ismember(val_edges_false, edges_all)
+    # import pdb; pdb.set_trace()
+    # assert ~ismember(val_edges_false, edges_all)
     assert ~ismember(val_edges, train_edges)
     assert ~ismember(test_edges, train_edges)
     assert ~ismember(val_edges, test_edges)
