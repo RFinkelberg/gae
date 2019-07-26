@@ -1,4 +1,3 @@
-# from gae.layers import GraphConvolution, GraphConvolutionSparse, InnerProductDecoder
 from gae.gae.layers import GraphConvolution, GraphConvolutionSparse, InnerProductDecoder
 import tensorflow as tf
 
@@ -57,7 +56,6 @@ class GCNModelAE(Model):
 
     def _build(self):
         self.hidden1 = GraphConvolutionSparse(input_dim=self.input_dim,
-                                            #   output_dim=FLAGS.hidden1,
                                               output_dim=self.hidden1_dim,
                                               adj=self.adj,
                                               features_nonzero=self.features_nonzero,
@@ -66,8 +64,6 @@ class GCNModelAE(Model):
                                               logging=self.logging)(self.inputs)
 
         self.embeddings = GraphConvolution(input_dim=self.hidden1_dim,
-            # input_dim=FLAGS.hidden1,
-            #                                output_dim=FLAGS.hidden2,
                                            output_dim=self.hidden2_dim,
                                            adj=self.adj,
                                            act=lambda x: x,
@@ -77,7 +73,6 @@ class GCNModelAE(Model):
         self.z_mean = self.embeddings
 
         self.reconstructions = InnerProductDecoder(input_dim=self.hidden2_dim,
-                                    #   input_dim=FLAGS.hidden2,
                                       act=lambda x: x,
                                       logging=self.logging)(self.embeddings)
 
