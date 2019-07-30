@@ -61,11 +61,34 @@ python train.py --dataset citeseer
 
 (or by editing `train.py`)
 
+## Cyber Data
+This fork provides support for a number of cybersecurity network datasets. These datasets can be specified with
+
+```bash
+python train.py --data_dir <path> --dataset <dataset_str>
+```
+Where `--data_dir <path>` specifies the directory containing the datasets, and `--dataset <dataset_str>` specifies which dataset to use. Currently the following are supported:
+Dataset | File expected inside `data_dir`
+--- | ---
+[email][1] | `email-Eu-core-temporal.txt` and `email_Eu-core-department-labels.txt`
+[alamos_flows][2] | `flows.txt`
+[UNSW][3] | `UNSW-NB15_1.csv`
+[gnutella][4] | `p2p-Gnutella08.txt`
+[bitcoin][5] | `soc-sign-bitcoinalpha.csv`
+
+[1]: http://snap.stanford.edu/data/email-Eu-core.html
+[2]: https://csr.lanl.gov/data/cyber1/
+[3]: https://www.unsw.adfa.edu.au/unsw-canberra-cyber/cybersecurity/ADFA-NB15-Datasets/
+[4]: http://snap.stanford.edu/data/p2p-Gnutella08.html
+[5]: http://snap.stanford.edu/data/soc-sign-bitcoin-alpha.html
+
+ These datasets are not packaged with the repository and should be downloaded from the links provided
+
 ## Models
 
 You can choose between the following models: 
 * `gcn_ae`: Graph Auto-Encoder (with GCN encoder)
-* `gcn_vae`: Variational Graph Auto-Encoder (with GCN encoder)
+* ~~`gcn_vae`: Variational Graph Auto-Encoder (with GCN encoder)~~ (not supported with cyber)
 
 ## Cite
 

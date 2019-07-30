@@ -94,18 +94,9 @@ class CyberDataset(object):
         elif dataset == "gnutella":
             path = self._data_dir("p2p-Gnutella08.txt")
             adj, features = self._load_gnutella(path)
-        elif dataset == "amazon":
-            path = self._data_dir("com-amazon.ungraph.tzt")
-            adj, features = self._load_amazon(path)
-        elif dataset == "brightkite":
-            path = self._data_dir("loc-brightkite_edges.txt")
-            adj, features = self._load_brightkite(path)
         elif dataset == "bitcoin":
             path = self._data_dir("soc-sign-bitcoinalpha.csv")
             adj, features = self._load_bitcoin(path)
-        elif dataset == "cic_ids":
-            path = self._data_dir("Wednesday-workingHours.pcap_ISCX.csv")
-            adj, features = self._load_cic_ids(path)
         else:
             raise NotImplementedError()
 
