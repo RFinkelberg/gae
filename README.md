@@ -68,6 +68,7 @@ This fork provides support for a number of cybersecurity network datasets. These
 python train.py --data_dir <path> --dataset <dataset_str>
 ```
 Where `--data_dir <path>` specifies the directory containing the datasets, and `--dataset <dataset_str>` specifies which dataset to use. Currently the following are supported:
+
 Dataset | File expected inside `data_dir`
 --- | ---
 [email][1] | `email-Eu-core-temporal.txt` and `email_Eu-core-department-labels.txt`
